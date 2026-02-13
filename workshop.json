@@ -8,7 +8,7 @@
 	    {
 	        "name": "default",
 	        "requirements": [
-                "uperf_src"
+                "uperf_sferlin"
 	        ]
 	    }
     ],
@@ -30,6 +30,20 @@
 			            "/usr/local/bin/uperf -V"
 		            ]
                 }
+	        }
+        },
+		{
+			"name": "uperf_sferlin",
+			"type": "manual",
+			"manual_info": {
+				"commands": [
+					"rm -rf /tmp/uperf_sferlin",
+					"git clone https://github.com/sferlin/uperf.git /tmp/uperf_sferlin",
+					"cd /tmp/uperf_sferlin && git checkout multithread",
+					"cd /tmp/uperf_sferlin && autoreconf --install && ./configure --disable-sctp && make install",
+					"ldconfig",
+					"/usr/local/bin/uperf -V"
+				]
 	        }
         }
     ]
