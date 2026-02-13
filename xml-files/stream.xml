@@ -5,7 +5,7 @@
       <flowop type="connect" options="remotehost=$remotehost protocol=$protocol port=$port"/>
     </transaction>
     <transaction duration="$duration">
-      <flowop type="write" options="count=256 size=$wsize"/>
+      <flowop type="write" options="size=$wsize"/>
     </transaction>
     <transaction iterations="1">
       <flowop type="disconnect"/>
