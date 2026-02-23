@@ -53,6 +53,11 @@
             "description": "valid cpu pinning modes",
             "args": [ "cpu-pin" ],
             "vals": "^numa$|^cpu:(([0-9]*)(-[1-9][0-9]*)?)(,(([1-9][0-9]*)(-[1-9][0-9]*)?))*$"
+        },
+        "cpu-affinity": {
+            "description": "cpu pin for uperf",
+            "args": [ "main-thread", "worker-thread" ],
+            "vals": "^[1-9][0-9]?$"
         }
     }
 }

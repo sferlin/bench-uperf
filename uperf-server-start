@@ -15,7 +15,7 @@ ifname=""
 cpu_pin=""
 ipv="4"
 
-longopts="ipv:,ifname:,cpu-pin:,passthru:"
+longopts="ipv:,ifname:,cpu-pin:,passthru:,main-thread:,worker-thread:"
 opts=$(getopt -q -o "" --longoptions "$longopts" -n "getopt.sh" -- "$@");
 if [ $? -ne 0 ]; then
     exit_error  "Unrecognized option specified"
@@ -49,6 +49,20 @@ while true; do
             shift;
             pt_opts=$1
             echo "pt_opts=$pt_opts"
+            shift
+            ;;
+        --main-thread)
+            shift
+            main_thread=$1
+            echo "main-thread=$main_thread"
+            main_thread_cpu="-M $main_thread"
+            shift
+            ;;
+        --worker-thread)
+            shift
+            worker_thread=$1
+            echo "worker-thread=$worker_thread"
+            worker_thread_cpu="-W $worker_thread"
             shift
             ;;
         --)
@@ -208,7 +222,7 @@ case "${cpu_pin}" in
 	;;
 esac
 
-cmd="${cpu_pin_cmd} uperf -s -P $control_port"
+cmd="${cpu_pin_cmd} uperf -s -P $control_port $main_thread_cpu $worker_thread_cpu"
 
 # strip ',' from the passthru options 
 passthru_opts=$(echo "$pt_opts" | sed 's/,/ /g')
