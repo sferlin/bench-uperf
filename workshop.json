@@ -34,7 +34,7 @@
 	        }
         },
           	{
-                        "name": "uperf_sferlin",
+                        "name": "liburing",
                         "type": "manual",
                         "manual_info": {
                                 "commands": [
