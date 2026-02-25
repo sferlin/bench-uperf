@@ -8,6 +8,7 @@
 	    {
 	        "name": "default",
 	        "requirements": [
+                "liburing",
                 "uperf_sferlin"
 	        ]
 	    }
@@ -32,6 +33,18 @@
                 }
 	        }
         },
+          	{
+                        "name": "uperf_sferlin",
+                        "type": "manual",
+                        "manual_info": {
+                                "commands": [
+                                        "rm -rf /tmp/liburing",
+                                        "git clone https://github.com/axboe/liburing.git /tmp/liburing",
+                                        "cd /tmp/liburing && git checkout liburing-2.13",
+                                        "cd /tmp/liburing && ./configure && make && make liburing.pc && make install"
+                                ]
+                }
+        },
 		{
 			"name": "uperf_sferlin",
 			"type": "manual",
@@ -40,7 +53,7 @@
 					"rm -rf /tmp/uperf_sferlin",
 					"git clone https://github.com/sferlin/uperf.git /tmp/uperf_sferlin",
 					"cd /tmp/uperf_sferlin && git checkout 524fcbdbd19e41efcf31ecdf4f0739fbd7fd235d",
-					"cd /tmp/uperf_sferlin && autoreconf --install && ./configure --disable-sctp && make install",
+					"cd /tmp/uperf_sferlin && autoreconf --install && ./configure --enable-tcp-zc --disable-sctp && make install",
 					"ldconfig",
 					"/usr/local/bin/uperf -V"
 				]
