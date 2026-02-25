@@ -17,7 +17,7 @@
         "protocols": {
             "description": "all possible protocols",
             "args": [ "protocol" ],
-            "vals": "^tcp$|^udp$"
+            "vals": "^tcp$|^tcp_zc$|^udp$"
         },
         "ipv": {
             "description": "ipv4 or ipv6",
