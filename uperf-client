@@ -252,7 +252,7 @@ echo "passthu options: $options"
 cmd+="$options"
 
 # add zero-copy specific options
-cmd+=" -I eno16595np0 -Q 1 -C 21"
+cmd+=" -I eno16595np0 -Q 1 -C -1"
 
 echo "going to run: ${cmd}"
 nthreads=$nthreads \
