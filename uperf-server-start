@@ -230,7 +230,7 @@ options+=" $passthru_opts"
 echo "passthu options: $options"
 
 # add zero-copy specific options
-options+=" -I eno16595np0 -Q 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 -C 26,27,28,29,30,31"
+options+=" -I eno16595np0 -Q 1 -C 21"
 
 cmd+="$options"
 
