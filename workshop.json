@@ -52,7 +52,7 @@
 				"commands": [
 					"rm -rf /tmp/uperf_sferlin",
 					"git clone https://github.com/sferlin/uperf.git /tmp/uperf_sferlin",
-					"cd /tmp/uperf_sferlin && git checkout 524fcbdbd19e41efcf31ecdf4f0739fbd7fd235d",
+					"cd /tmp/uperf_sferlin && git checkout 9fd85ec606aa9a2a502896f1952059a7e379cae8",
 					"cd /tmp/uperf_sferlin && autoreconf --install && ./configure --enable-tcp-zc --disable-sctp && make install",
 					"ldconfig",
 					"/usr/local/bin/uperf -V"
