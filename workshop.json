@@ -8,6 +8,7 @@
 	    {
 	        "name": "default",
 	        "requirements": [
+				"deps",
                 "liburing",
                 "uperf_sferlin"
 	        ]
@@ -33,6 +34,16 @@
                 }
 	        }
         },
+		{
+			"name": "deps",
+			"type": "distro",
+			"distro_info": {
+				"packages": [
+					"lksctp-tools-devel",
+					"tuna"
+				]
+			},
+		},
           	{
                         "name": "liburing",
                         "type": "manual",
