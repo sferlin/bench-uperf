@@ -1,74 +1,74 @@
 {
-    "workshop": {
-        "schema": {
-            "version": "2020.03.02"
-        }
-    },
-    "userenvs": [
-	    {
-	        "name": "default",
-	        "requirements": [
-				"deps",
-                "liburing",
-                "uperf_sferlin"
-	        ]
-	    }
-    ],
-    "requirements": [
-	    {
-	        "name": "uperf_src",
-	        "type": "source",
-	        "source_info": {
-		        "url": "https://github.com/uperf/uperf/archive/1.0.7.tar.gz",
-		        "filename": "1.0.7.tar.gz",
-		        "commands": { 
-		            "unpack": "tar -xzf 1.0.7.tar.gz",
-		            "get_dir": "tar -tzf 1.0.7.tar.gz | head -n 1",
-		            "commands": [
-			            "CFLAGS=\"-ggdb\" ./configure --disable-sctp",
-			            "make",
-			            "make install",
-			            "ldconfig",
-			            "/usr/local/bin/uperf -V"
-		            ]
-                }
-	        }
-        },
-		{
-			"name": "deps",
-			"type": "distro",
-			"distro_info": {
-				"packages": [
-					"lksctp-tools-devel",
-					"tuna"
-				]
-			},
-		},
-          	{
-                        "name": "liburing",
-                        "type": "manual",
-                        "manual_info": {
-                                "commands": [
-                                        "rm -rf /tmp/liburing",
-                                        "git clone https://github.com/axboe/liburing.git /tmp/liburing",
-                                        "cd /tmp/liburing && git checkout liburing-2.13",
-                                        "cd /tmp/liburing && ./configure && make && make liburing.pc && make install"
-                                ]
-                }
-        },
-		{
-			"name": "uperf_sferlin",
-			"type": "manual",
-			"manual_info": {
-				"commands": [
-					"rm -rf /tmp/uperf_sferlin",
-					"git clone https://github.com/sferlin/uperf.git /tmp/uperf_sferlin",
-					"cd /tmp/uperf_sferlin && git checkout 9fd85ec606aa9a2a502896f1952059a7e379cae8",
-					"cd /tmp/uperf_sferlin && autoreconf --install && ./configure --enable-tcp-zc --disable-sctp && make install",
-					"ldconfig",
-					"/usr/local/bin/uperf -V"
-				]
-	        }
-        }
-    ]
+   "workshop":{
+      "schema":{
+         "version":"2020.03.02"
+      }
+   },
+   "userenvs":[
+      {
+         "name":"default",
+         "requirements":[
+            "deps",
+            "liburing",
+            "uperf_sferlin"
+         ]
+      }
+   ],
+   "requirements":[
+      {
+         "name":"uperf_src",
+         "type":"source",
+         "source_info":{
+            "url":"https://github.com/uperf/uperf/archive/1.0.7.tar.gz",
+            "filename":"1.0.7.tar.gz",
+            "commands":{
+               "unpack":"tar -xzf 1.0.7.tar.gz",
+               "get_dir":"tar -tzf 1.0.7.tar.gz | head -n 1",
+               "commands":[
+                  "CFLAGS=\"-ggdb\" ./configure --disable-sctp",
+                  "make",
+                  "make install",
+                  "ldconfig",
+                  "/usr/local/bin/uperf -V"
+               ]
+            }
+         }
+      },
+      {
+         "name":"deps",
+         "type":"distro",
+         "distro_info":{
+            "packages":[
+               "lksctp-tools-devel",
+               "tuna"
+            ]
+         }
+      },
+      {
+         "name":"liburing",
+         "type":"manual",
+         "manual_info":{
+            "commands":[
+               "rm -rf /tmp/liburing",
+               "git clone https://github.com/axboe/liburing.git /tmp/liburing",
+               "cd /tmp/liburing && git checkout liburing-2.13",
+               "cd /tmp/liburing && ./configure && make && make liburing.pc && make install"
+            ]
+         }
+      },
+      {
+         "name":"uperf_sferlin",
+         "type":"manual",
+         "manual_info":{
+            "commands":[
+               "rm -rf /tmp/uperf_sferlin",
+               "git clone https://github.com/sferlin/uperf.git /tmp/uperf_sferlin",
+               "cd /tmp/uperf_sferlin && git checkout 9fd85ec606aa9a2a502896f1952059a7e379cae8",
+               "cd /tmp/uperf_sferlin && autoreconf --install && ./configure --enable-tcp-zc --disable-sctp && make install",
+               "ldconfig",
+               "/usr/local/bin/uperf -V"
+            ]
+         }
+      }
+   ]
 }
