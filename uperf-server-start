@@ -13,9 +13,12 @@ control_port=""
 data_port=""
 ifname=""
 cpu_pin=""
+irq_pin=""
+irq_prio=""
+softirq_prio=""
 ipv="4"
 
-longopts="ipv:,ifname:,cpu-pin:,passthru:,main-thread:,worker-thread:"
+longopts="ipv:,ifname:,cpu-pin:,passthru:,main-thread:,worker-thread:,irq-pin:,irq-prio:,softirq-prio:"
 opts=$(getopt -q -o "" --longoptions "$longopts" -n "getopt.sh" -- "$@");
 if [ $? -ne 0 ]; then
     exit_error  "Unrecognized option specified"
@@ -23,6 +26,12 @@ fi
 eval set -- "$opts";
 while true; do
     case "$1" in
+        --irq-pin)
+            shift
+            irq_pin=$1
+            echo "irq_pin=${irq_pin}"
+            shift
+            ;;
         --cpu-pin)
             shift;
             cpu_pin=$1
@@ -63,6 +72,18 @@ while true; do
             worker_thread=$1
             echo "worker-thread=$worker_thread"
             worker_thread_cpu="-W $worker_thread"
+            shift
+            ;;
+        --irq-prio)
+            shift
+            irq_prio=$1
+            echo "irq_prio=$irq_prio"
+            shift
+            ;;
+        --softirq-prio)
+            shift
+            softirq_prio=$1
+            echo "softirq_prio=$softirq_prio"
             shift
             ;;
         --)
@@ -204,8 +225,11 @@ if [ -e /sys/class/net/${ifname}/device/numa_node ]; then
     if [ $ifname_numa_node == "-1" ] && [ "${cpu_pin}" == "numa" ]; then
         exit_error "PCIe has no NUMA locality, but cpu-pin is numa"
     fi
+    if [ $ifname_numa_node == "-1" ] && [ "${irq_pin}" == "numa" ]; then
+        exit_error "PCIe has no NUMA locality, but irq-pin is numa"
+    fi
     ifname_numa_node_cpus=$(cat /sys/devices/system/node/node${ifname_numa_node}/cpulist)
-elif [ "${cpu_pin}" == "numa" ]; then
+elif [ "${cpu_pin}" == "numa" ] || [ "${irq_pin}" == "numa" ]; then
     exit_error "cannot determine numa node for interface '${ifname}' and cpu-pin is numa"
 fi
 
@@ -216,11 +240,80 @@ cpu_pin_cmd=""
 case "${cpu_pin}" in
     "numa")
 	cpu_pin_cmd="taskset --cpu-list ${ifname_numa_node_cpus}"
+        echo "CPU Pinning: NUMA [ $ifname_numa_node_cpus ]"
 	;;
     "cpu")
 	cpu_pin_cmd="taskset --cpu-list ${cpu_pin_param}"
+	echo "CPU Pinning: CPU(s) [ $cpu_pin_param ]"
 	;;
 esac
+
+irq_pin_mode=$(echo "${irq_pin}" | awk -F: '{ print $1 }')
+case "${irq_pin_mode}" in
+    "none")
+       unset irq_affinity
+       ;;
+    "default")
+       irq_affinity=${HK_CPUS}
+       ;;
+    "numa")
+       irq_affinity=${ifname_numa_node_cpus}
+       ;;
+    "cpu")
+       irq_affinity=$(echo "${irq_pin}" | awk -F: '{ print $2 }')
+       ;;
+esac
+echo "IRQ Affinity: [ $irq_affinity ] : $irq_pin_mode "
+
+# IRQ affinity
+if [ -n "${irq_affinity}" ]; then
+
+    echo
+    echo "IRQ AFFINITY (original)"
+    echo "#######################"
+    echo
+    tuna show_threads -c ${irq_affinity}
+    tuna show_irqs -q *${ifname}*
+    for i in $(grep $ifname /proc/interrupts | awk '{ print $1 }' | sed 's/://'); do
+        _irq_affinity="$( cat /proc/irq/$i/smp_affinity_list )"
+        grep . /proc/irq/$i/smp_affinity_list
+        echo "echo $_irq_affinity > /proc/irq/$i/smp_affinity_list" >> orig.conf
+    done
+
+    echo
+    echo "IRQ AFFINITY (new)"
+    echo "#######################"
+    echo
+    _vendor="$(/sys/class/net/$ifname/device/vendor)"
+    _pci=$(basename $(readlink /sys/class/net/$ifname/device))
+    if [[ "$_vendor" == "0x15b3" ]]; then
+        _irq_handler="mlx5_comp.*@pci:$_pci"
+    else
+        _irq_handler=$ifname
+    fi
+    _irqs=($(grep -E "$_irq_handler" /proc/interrupts | awk -F':' '{print $1}' | tr -d ' ' | sort -n))
+    _cpus=($(expand_cpus "$irq_affinity"))
+
+    for i in $(seq 0 $((nthreads - 1))); do
+        _irq=${_irqs[$i]}
+        _cpu=${_cpus[$i]}
+        if [[ -n "$_irq" && -n "$_cpu" ]]; then
+            tuna isolate --cpus ${_cpu}
+            echo "$_cpu" > "/proc/irq/$_irq/smp_affinity_list"
+            tuna show_threads -c ${_cpu}
+            cat /proc/irq/$_irq/smp_affinity_list
+	    if [[ -n "$irq_prio" ]]; then
+		chrt -f -p $irq_prio $(pgrep -f $_irq_handler)
+	    fi
+	    if [[ -n "$softirq_prio" ]]; then
+		chrt -f -p $softirq_prio $(pgrep -f softirqd/$_cpu)
+	    fi
+        else
+            echo "Warning: Invalid IRQ pinning (IRQ: $_irq, CPU: $_cpu)"
+        fi
+    done
+    tuna show_irqs -q *${_irq_handler}*
+fi
 
 cmd="${cpu_pin_cmd} uperf -s -P $control_port $main_thread_cpu $worker_thread_cpu"
 
