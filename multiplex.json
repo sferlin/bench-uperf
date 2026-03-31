@@ -9,6 +9,15 @@
         ]
     },
     "validations": {
+        "yesno": {
+          "description": "yes|no",
+          "args": [
+            "history",
+            "histogram",
+            "quiet"
+          ],
+          "vals": "yes|no"
+        },
         "test-types": {
             "description": "all possible test-types",
             "args": [ "test-type" ],
@@ -23,6 +32,11 @@
             "description": "ipv4 or ipv6",
             "args": [ "ipv" ],
             "vals": "^4$|^6$"
+        },
+        "divisible-by-1000": {
+            "description": "a number divisible by 1000",
+            "args": [ "bucket-length", "max-bucket" ],
+            "vals": "^(0|[1-9][0-9]*000)$"
         },
         "positive_integer": {
             "description": "a whole number greater than 0",

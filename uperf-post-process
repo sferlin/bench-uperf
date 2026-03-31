@@ -36,6 +36,8 @@ GetOptions ("test-type=s" => \$test_type,
             "ifname=s" => \$ignore,
             "cpu-pin=s" => \$ignore,
             "ipv=i" => \$ignore,
+            "history=s" => \$ignore,
+            "histogram=s" => \$ignore,
             "main-thread=i" => \$ignore,
             "worker-thread=i" => \$ignore,
             );

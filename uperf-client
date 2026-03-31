@@ -22,13 +22,14 @@ test_type="stream"
 uopts=""
 cpu_pin=""
 ipv="4"
+raw_ts="-R"
 main_thread=""
 worker_thread=""
 irq_pin=""
 irq_prio=""
 softirq_prio=""
 
-longopts="ipv:,test-type:,protocol:,rsize:,wsize:,nthreads:,remotehost:,duration:,cpu-pin:,think:,passthru:,main-thread:,worker-thread:,irq-pin:,irq_prio:,softirq-prio:"
+longopts="ipv:,test-type:,protocol:,rsize:,wsize:,nthreads:,remotehost:,duration:,cpu-pin:,think:,passthru:,history:,histogram:,bucket-length:,max-bucket:,quiet:,main-thread:,worker-thread:,irq-pin:,irq_prio:,softirq-prio:"
 opts=$(getopt -q -o "" --longoptions "$longopts" -n "getopt.sh" -- "$@");
 if [ $? -ne 0 ]; then
     exit_error "Unrecognized option specified"
@@ -36,6 +37,14 @@ fi
 eval set -- "$opts";
 while true; do
     case "$1" in
+        --quiet)
+            shift
+            if [ "$1" == "yes" ]; then
+                uopts="$uopts -q"
+                echo "uopts=$uopts"
+            fi
+            shift
+            ;;
         --ipv)
             shift;
             ipv="$1"
@@ -109,6 +118,38 @@ while true; do
             shift;
             pt_opts=$1
             echo "pt_opts=$pt_opts"
+            shift
+            ;;
+        --histogram)
+            shift
+            if [ "$1" == "yes" ]; then
+                # Disable Raw timestamp (-R)
+                raw_ts=""
+                uopts="$uopts -H histogram.txt"
+                echo "uopts=$uopts"
+            fi
+            shift
+            ;;
+        --bucket-length)
+            shift
+            bucket_len=$1
+            echo "bucket-length=$bucket_len"
+            uopts="$uopts -b $bucket_len"
+            shift
+            ;;
+        --max-bucket)
+            shift
+            max_bucket=$1
+            echo "max-bucket=$max_bucket"
+            uopts="$uopts -B $max_bucket"
+            shift
+            ;;
+        --history)
+            shift
+            if [ "$1" == "yes" ]; then
+               uopts="$uopts -X history.txt"
+               echo "uopts=$uopts"
+            fi
             shift
             ;;
         --worker-thread)
@@ -339,7 +380,7 @@ if [ -n "${irq_affinity}" ]; then
     tuna show_irqs -q *${_irq_handler}*
 fi
 
-cmd+="${cpu_pin_cmd} uperf -R -m test.xml -P $control_port $main_thread_cpu $worker_thread_cpu $uopts"
+cmd+="${cpu_pin_cmd} uperf $raw_ts -m test.xml -P $control_port $main_thread_cpu $worker_thread_cpu $uopts"
 
 # strip ',' from the passthru options 
 passthru_opts=$(echo "$pt_opts" | sed 's/,/ /g')
